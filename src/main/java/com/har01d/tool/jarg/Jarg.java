@@ -131,9 +131,9 @@ public final class Jarg {
         return option.getValue();
     }
 
-    public List<String> getValues(String name) {
+    public String getValue(String name, String defaultValue) {
         JOption option = getOption(name);
-        return option.getValues();
+        return option.isPresent() ? option.getValue() : defaultValue;
     }
 
     public boolean getBooleanValue(String name) {
@@ -144,20 +144,45 @@ public final class Jarg {
         return Byte.parseByte(getValue(name));
     }
 
+    public byte getByteValue(String name, byte defaultValue) {
+        return Byte.parseByte(getValue(name, String.valueOf(defaultValue)));
+    }
+
     public int getIntValue(String name) {
         return Integer.parseInt(getValue(name));
+    }
+
+    public int getIntValue(String name, int defaultValue) {
+        return Integer.parseInt(getValue(name, String.valueOf(defaultValue)));
     }
 
     public long getLongValue(String name) {
         return Long.parseLong(getValue(name));
     }
 
+    public long getLongValue(String name, long defaultValue) {
+        return Long.parseLong(getValue(name, String.valueOf(defaultValue)));
+    }
+
     public float getFloatValue(String name) {
         return Float.parseFloat(getValue(name));
     }
 
+    public float getFloatValue(String name, float defaultValue) {
+        return Float.parseFloat(getValue(name, String.valueOf(defaultValue)));
+    }
+
     public double getDoubleValue(String name) {
         return Double.parseDouble(getValue(name));
+    }
+
+    public double getDoubleValue(String name, double defaultValue) {
+        return Double.parseDouble(getValue(name, String.valueOf(defaultValue)));
+    }
+
+    public List<String> getValues(String name) {
+        JOption option = getOption(name);
+        return option.getValues();
     }
 
     public List<Integer> getIntValues(String name) {
