@@ -4,7 +4,7 @@ import com.har01d.tool.jarg.Jarg;
 
 public class Main {
     public static void main(String[] args) {
-        Jarg jarg = new Jarg("test");
+        Jarg jarg = new Jarg("Jarg");
         jarg.addOption("--user|-u", "The username");
         jarg.addOption("--password|-p", "The password");
         jarg.addOption("--version|-v", "Show the version", false);

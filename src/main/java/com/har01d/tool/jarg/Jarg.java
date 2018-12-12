@@ -5,25 +5,58 @@ import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public final class Jarg {
+public final class Jarg extends JCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(Jarg.class);
 
-    private final Map<String, JOption> map = new HashMap<>();
-    private final List<JOption> options = new ArrayList<>();
-    private final List<String> arguments = new ArrayList<>();
+    private final List<JCommand> commands = new ArrayList<>();
 
-    private final String name;
+    private final List<String> arguments = new ArrayList<>();
+    private JCommand command;
 
     public Jarg(String name) {
-        this.name = name;
+        super(name, null);
+    }
+
+    public Jarg(String name, String description) {
+        super(name, description);
+    }
+
+    public List<String> getArguments() {
+        return arguments;
+    }
+
+    public boolean isCommand(String name) {
+        return command != null && name.equals(command.getName());
+    }
+
+    public JCommand getCommand() {
+        return command;
+    }
+
+    public JCommand getCommand(String name) {
+        for (JCommand command : commands) {
+            if (command.getName().equals(name)) {
+                return command;
+            }
+        }
+        return null;
+    }
+
+    public String getCommandName() {
+        return command == null ? null : command.getName();
+    }
+
+    public JCommand addCommand(String name, String description) {
+        JCommand command = new JCommand(name, description, this);
+        commands.add(command);
+        return command;
     }
 
     public void parse(String[] args) {
+        boolean checkedCommand = false;
         for (int i = 0; i < args.length; ++i) {
             String arg = args[i];
             String name = null;
@@ -41,8 +74,14 @@ public final class Jarg {
             }
 
             if (name != null) {
+                JOption option = null;
                 if (map.containsKey(name)) {
-                    JOption option = map.get(name);
+                    option = map.get(name);
+                } else if (command != null && command.hasOption(name)) {
+                    option = command.getOption(name);
+                }
+
+                if (option != null) {
                     if (value == null) {
                         if (option.isHasValue()) {
                             value = args[++i];
@@ -55,6 +94,18 @@ public final class Jarg {
                 } else {
                     logger.warn("Unknown option: " + name);
                 }
+            } else if (!checkedCommand) {
+                for (JCommand command : commands) {
+                    if (arg.equals(command.getName())) {
+                        this.command = command;
+                        break;
+                    }
+                }
+
+                checkedCommand = true;
+                if (this.command == null) {
+                    arguments.add(arg);
+                }
             } else {
                 arguments.add(arg);
             }
@@ -62,187 +113,49 @@ public final class Jarg {
     }
 
     public void printHelp(PrintStream printStream) {
-        printStream.println("NAME");
-        printStream.println("       " + name);
-
-        printStream.println("OPTIONS");
-        this.options.forEach(e -> {
-            List<String> options = new ArrayList<>(e.getShortOptions());
-            if (e.isHasValue()) {
-                e.getLongOptions().forEach(o -> options.add(o + " <VALUE>"));
-            } else {
-                options.addAll(e.getLongOptions());
-            }
-            printStream.println("       " + joinString(options));
-            printStream.println("              " + e.getDescription());
-        });
-    }
-
-    private String joinString(List<String> values) {
-        StringBuilder sb = new StringBuilder();
-        for (String str : values) {
-            if (sb.length() > 0) {
-                sb.append(", ").append(str);
-            } else {
-                sb.append(str);
+        if (!arguments.isEmpty()) {
+            String name = arguments.get(0);
+            JCommand command = getCommand(name);
+            if (command != null) {
+                printStream.println("COMMAND");
+                printStream.println(indent(4) + command.getName() + indent(8) + command.getDescription());
+                command.printOptions(printStream);
+                return;
             }
         }
-        return sb.toString();
+
+        printStream.println("NAME");
+        printStream.println(indent(4) + getName() + (getDescription() == null ? "" : " — " + getDescription()));
+
+        printOptions(printStream);
+        printCommands(printStream);
     }
 
-    public JOption addOption(String value, String description) {
-        return addOption(value, description, true);
-    }
-
-    public JOption addOption(String value, String description, boolean hasValue) {
-        JOption option = new JOption(value, description, hasValue);
-        option.getOptions().forEach(name -> {
-            if (map.containsKey(name)) {
-                throw new IllegalArgumentException("Duplicate option name: " + name);
+    private void printCommands(PrintStream printStream) {
+        if (!this.commands.isEmpty()) {
+            printStream.println("COMMANDS");
+            int max = 0;
+            for (JCommand command : commands) {
+                max = Math.max(max, command.getName().length());
             }
-            map.put(name, option);
-        });
-        options.add(option);
-        return option;
-    }
 
-    public List<String> getArguments() {
-        return arguments;
-    }
-
-    public boolean hasOption(String name) {
-        return map.containsKey(name);
+            int m = max;
+            this.commands.forEach(o -> {
+                printStream.println(indent(4) + o.getName() + indent(8) + indent(m - o.getName().length()) + o.getDescription());
+            });
+        }
     }
 
     public JOption getOption(String name) {
-        if (!map.containsKey(name)) {
-            throw new IllegalArgumentException("Unknown option: " + name);
+        if (command != null && command.hasOption(name)) {
+            return command.getOption(name);
         }
-        return map.get(name);
-    }
 
-    public boolean isPresent(String name) {
-        JOption option = getOption(name);
-        return option != null && option.isPresent();
-    }
-
-    public String getValue(String name) {
-        JOption option = getOption(name);
-        return option.getValue();
-    }
-
-    public String getValue(String name, String defaultValue) {
-        JOption option = getOption(name);
-        return option.isPresent() ? option.getValue() : defaultValue;
-    }
-
-    public boolean getBooleanValue(String name) {
-        return "true".equalsIgnoreCase(getValue(name));
-    }
-
-    public byte getByteValue(String name) {
-        return Byte.parseByte(getValue(name));
-    }
-
-    public byte getByteValue(String name, byte defaultValue) {
-        return Byte.parseByte(getValue(name, String.valueOf(defaultValue)));
-    }
-
-    public int getIntValue(String name) {
-        return Integer.parseInt(getValue(name));
-    }
-
-    public int getIntValue(String name, int defaultValue) {
-        return Integer.parseInt(getValue(name, String.valueOf(defaultValue)));
-    }
-
-    public long getLongValue(String name) {
-        return Long.parseLong(getValue(name));
-    }
-
-    public long getLongValue(String name, long defaultValue) {
-        return Long.parseLong(getValue(name, String.valueOf(defaultValue)));
-    }
-
-    public float getFloatValue(String name) {
-        return Float.parseFloat(getValue(name));
-    }
-
-    public float getFloatValue(String name, float defaultValue) {
-        return Float.parseFloat(getValue(name, String.valueOf(defaultValue)));
-    }
-
-    public double getDoubleValue(String name) {
-        return Double.parseDouble(getValue(name));
-    }
-
-    public double getDoubleValue(String name, double defaultValue) {
-        return Double.parseDouble(getValue(name, String.valueOf(defaultValue)));
-    }
-
-    public List<String> getValues(String name) {
-        JOption option = getOption(name);
-        return option.getValues();
-    }
-
-    public List<Integer> getIntValues(String name) {
-        List<Integer> result = new ArrayList<>();
-        List<String> values = getValues(name);
-        if (values.size() == 1) {
-            for (String val : values.get(0).split("[;|,]")) {
-                result.add(Integer.parseInt(val));
-            }
-        } else {
-            for (String val : values) {
-                result.add(Integer.parseInt(val));
-            }
+        if (map.containsKey(name)) {
+            return map.get(name);
         }
-        return result;
-    }
 
-    public List<Long> getLongValues(String name) {
-        List<Long> result = new ArrayList<>();
-        List<String> values = getValues(name);
-        if (values.size() == 1) {
-            for (String val : values.get(0).split("[;|,]")) {
-                result.add(Long.parseLong(val));
-            }
-        } else {
-            for (String val : values) {
-                result.add(Long.parseLong(val));
-            }
-        }
-        return result;
-    }
-
-    public List<Float> getFloatValues(String name) {
-        List<Float> result = new ArrayList<>();
-        List<String> values = getValues(name);
-        if (values.size() == 1) {
-            for (String val : values.get(0).split("[;|,]")) {
-                result.add(Float.parseFloat(val));
-            }
-        } else {
-            for (String val : values) {
-                result.add(Float.parseFloat(val));
-            }
-        }
-        return result;
-    }
-
-    public List<Double> getDoubleValues(String name) {
-        List<Double> result = new ArrayList<>();
-        List<String> values = getValues(name);
-        if (values.size() == 1) {
-            for (String val : values.get(0).split("[;|,]")) {
-                result.add(Double.parseDouble(val));
-            }
-        } else {
-            for (String val : values) {
-                result.add(Double.parseDouble(val));
-            }
-        }
-        return result;
+        throw new IllegalArgumentException("Unknown option: " + name);
     }
 
 }
