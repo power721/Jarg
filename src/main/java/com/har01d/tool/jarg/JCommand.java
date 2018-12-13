@@ -7,7 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class JCommand {
+
+    private static final Logger logger = LoggerFactory.getLogger(JCommand.class);
 
     protected final Map<String, JOption> map = new HashMap<>();
     protected final List<JOption> options = new ArrayList<>();
@@ -61,7 +66,11 @@ public class JCommand {
     }
 
     public boolean isPresent(String name) {
-        JOption option = getOption(name);
+        JOption option = map.get(name);
+
+        if (option == null) {
+            logger.warn("Unknown option: {}", name);
+        }
         return option != null && option.isPresent();
     }
 

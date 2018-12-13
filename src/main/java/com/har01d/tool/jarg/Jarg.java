@@ -121,17 +121,23 @@ public final class Jarg extends JCommand {
             }
         }
 
+        if (args.length == 0) {
+            printHelp(System.out);
+            System.exit(1);
+        }
+
         if (autoHelp) {
             if (isCommand("help")) {
                 printHelp(System.out);
+                System.exit(0);
             } else if (isPresent("help")) {
                 if (command != null) {
                     command.printHelp(System.out);
                 } else {
                     printHelp(System.out);
                 }
+                System.exit(0);
             }
-            System.exit(0);
         }
     }
 
@@ -177,6 +183,22 @@ public final class Jarg extends JCommand {
         }
 
         throw new IllegalArgumentException("Unknown option: " + name);
+    }
+
+    public boolean isPresent(String name) {
+        JOption option = null;
+        if (command != null && command.hasOption(name)) {
+            option = command.getOption(name);
+        }
+
+        if (map.containsKey(name)) {
+            option = map.get(name);
+        }
+
+        if (option == null) {
+            logger.warn("Unknown option: {}", name);
+        }
+        return option != null && option.isPresent();
     }
 
 }
