@@ -28,6 +28,10 @@ public final class Jarg extends JCommand {
         return arguments;
     }
 
+    public String getArgument(int index) {
+        return arguments.get(index);
+    }
+
     public boolean isCommand(String name) {
         return command != null && name.equals(command.getName());
     }
