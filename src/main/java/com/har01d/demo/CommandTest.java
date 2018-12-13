@@ -6,6 +6,7 @@ import com.har01d.tool.jarg.Jarg;
 public class CommandTest {
     public static void main(String[] args) {
         Jarg jarg = new Jarg("Jarg", "Java arguments parser");
+        jarg.setAutoHelp(true);
         jarg.addCommand("help", "Show this help text");
         jarg.addCommand("version", "Show the version");
         jarg.addOption("--debug|-d", "Show debug message", false);
@@ -15,9 +16,7 @@ public class CommandTest {
         command.addOption("--password|-p", "The password");
 
         jarg.parse(args);
-        if (jarg.isCommand("help")) {
-            jarg.printHelp(System.out);
-        } else if (jarg.isCommand("version")) {
+        if (jarg.isCommand("version")) {
             System.out.println("1.0.0");
         } else {
             System.out.println("Command: " + jarg.getCommandName());

@@ -1,11 +1,11 @@
 package com.har01d.tool.jarg;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class Jarg extends JCommand {
 
@@ -14,6 +14,7 @@ public final class Jarg extends JCommand {
     private final List<JCommand> commands = new ArrayList<>();
 
     private final List<String> arguments = new ArrayList<>();
+    private boolean autoHelp;
     private JCommand command;
 
     public Jarg(String name) {
@@ -22,6 +23,10 @@ public final class Jarg extends JCommand {
 
     public Jarg(String name, String description) {
         super(name, description);
+    }
+
+    public void setAutoHelp(boolean autoHelp) {
+        this.autoHelp = autoHelp;
     }
 
     public List<String> getArguments() {
@@ -115,6 +120,19 @@ public final class Jarg extends JCommand {
                 arguments.add(arg);
             }
         }
+
+        if (autoHelp) {
+            if (isCommand("help")) {
+                printHelp(System.out);
+            } else if (isPresent("help")) {
+                if (command != null) {
+                    command.printHelp(System.out);
+                } else {
+                    printHelp(System.out);
+                }
+            }
+            System.exit(0);
+        }
     }
 
     public void printHelp(PrintStream printStream) {
@@ -128,7 +146,7 @@ public final class Jarg extends JCommand {
         }
 
         printStream.println("NAME");
-        printStream.println(indent(4) + getName() + (getDescription() == null ? "" : " — " + getDescription()));
+        printStream.println(indent(4) + getName() + (getDescription() == null ? "" : "  -    " + getDescription()));
 
         printOptions(printStream);
         printCommands(printStream);
