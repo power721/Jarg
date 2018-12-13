@@ -74,10 +74,10 @@ public final class Jarg extends JCommand {
 
             if (arg.startsWith("--")) {
                 name = arg.substring(2);
-                int index = name.indexOf('=');
+                int index = arg.indexOf('=');
                 if (index > -1) {
-                    name = name.substring(0, index);
-                    value = name.substring(index + 1);
+                    name = arg.substring(2, index);
+                    value = arg.substring(index + 1);
                 }
             } else if (arg.startsWith("-")) {
                 name = arg.substring(1);

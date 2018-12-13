@@ -3,8 +3,11 @@ package com.har01d.demo;
 import com.har01d.tool.jarg.JCommand;
 import com.har01d.tool.jarg.Jarg;
 
+import java.util.TimeZone;
+
 public class CommandTest {
     public static void main(String[] args) {
+        System.out.println(TimeZone.getTimeZone("America/New_York").getID());
         Jarg jarg = new Jarg("Jarg", "Java arguments parser");
         jarg.setAutoHelp(true);
         jarg.addCommand("help", "Show this help text");
