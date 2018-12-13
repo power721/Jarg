@@ -2,6 +2,7 @@ package com.har01d.tool.jarg;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,9 +119,18 @@ public class JCommand {
         return Double.parseDouble(getValue(name, String.valueOf(defaultValue)));
     }
 
-    public List<String> getValues(String name) {
+    private List<String> getValues(String name) {
         JOption option = getOption(name);
         return option.getValues();
+    }
+
+    public List<String> getStringValues(String name) {
+        List<String> values = getValues(name);
+        if (values.size() == 1) {
+            return Arrays.asList(values.get(0).split("[;|,]"));
+        } else {
+            return values;
+        }
     }
 
     public List<Integer> getIntValues(String name) {
