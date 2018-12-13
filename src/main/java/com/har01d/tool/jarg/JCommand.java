@@ -203,6 +203,12 @@ public class JCommand {
         return sb.toString();
     }
 
+    public void printHelp(PrintStream printStream) {
+        printStream.println("COMMAND");
+        printStream.println(indent(4) + name + indent(8) + description);
+        printOptions(printStream);
+    }
+
     protected void printOptions(PrintStream printStream) {
         List<JOption> options = new ArrayList<>();
         if (parent != null) {

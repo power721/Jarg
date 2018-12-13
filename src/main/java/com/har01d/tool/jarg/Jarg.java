@@ -51,6 +51,7 @@ public final class Jarg extends JCommand {
 
     public JCommand addCommand(String name, String description) {
         JCommand command = new JCommand(name, description, this);
+        command.addOption("--help|-h", "Show the help text", false);
         commands.add(command);
         return command;
     }
@@ -117,9 +118,7 @@ public final class Jarg extends JCommand {
             String name = arguments.get(0);
             JCommand command = getCommand(name);
             if (command != null) {
-                printStream.println("COMMAND");
-                printStream.println(indent(4) + command.getName() + indent(8) + command.getDescription());
-                command.printOptions(printStream);
+                command.printHelp(printStream);
                 return;
             }
         }
