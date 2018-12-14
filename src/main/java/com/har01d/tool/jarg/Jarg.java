@@ -127,15 +127,15 @@ public final class Jarg extends JCommand {
         }
 
         if (autoHelp) {
-            if (isCommand("help")) {
-                printHelp(System.out);
-                System.exit(0);
-            } else if (isPresent("help")) {
+            if (isPresent("help")) {
                 if (command != null) {
                     command.printHelp(System.out);
                 } else {
                     printHelp(System.out);
                 }
+                System.exit(0);
+            } else if (isCommand("help")) {
+                printHelp(System.out);
                 System.exit(0);
             }
         }

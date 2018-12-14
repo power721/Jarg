@@ -232,6 +232,11 @@ public class JCommand {
     public void printHelp(PrintStream printStream) {
         printStream.println("COMMAND");
         printStream.println(indent(4) + joinString(aliases) + indent(8) + description);
+        if (name.equals("help")) {
+            printStream.println("USAGE");
+            printStream.println(indent(4) + "COMMAND --help");
+            printStream.println(indent(4) + "help COMMAND");
+        }
         printOptions(printStream);
     }
 

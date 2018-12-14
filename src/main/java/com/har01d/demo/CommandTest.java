@@ -10,8 +10,8 @@ public class CommandTest {
         jarg.addCommand("help", "Show this help text");
         jarg.addCommand("version", "Show the version");
         jarg.addOption("--debug|-d", "Show debug message", false);
-        JCommand command = jarg.addCommand("test", "Test user credentials").aliases("login");
 
+        JCommand command = jarg.addCommand("test", "Test user credentials").aliases("login");
         command.addOption("--user|-u", "The username").setValueName("USERNAME");
         command.addOption("--password|-p", "The password").setValueName("PASSWORD");
 
