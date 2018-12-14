@@ -14,9 +14,9 @@ public class JCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(JCommand.class);
 
-    protected final Map<String, JOption> map = new HashMap<>();
-    protected final List<JOption> options = new ArrayList<>();
-    final List<String> aliases = new ArrayList<>();
+    protected final Map<String, JOption> map = new HashMap<String, JOption>();
+    protected final List<JOption> options = new ArrayList<JOption>();
+    final List<String> aliases = new ArrayList<String>();
     private final String name;
     private final String description;
     private final JCommand parent;
@@ -168,7 +168,7 @@ public class JCommand {
     }
 
     public List<Integer> getIntValues(String name) {
-        List<Integer> result = new ArrayList<>();
+        List<Integer> result = new ArrayList<Integer>();
         List<String> values = getValues(name);
         if (values.size() == 1) {
             for (String val : values.get(0).split("[;|,]")) {
@@ -183,7 +183,7 @@ public class JCommand {
     }
 
     public List<Long> getLongValues(String name) {
-        List<Long> result = new ArrayList<>();
+        List<Long> result = new ArrayList<Long>();
         List<String> values = getValues(name);
         if (values.size() == 1) {
             for (String val : values.get(0).split("[;|,]")) {
@@ -198,7 +198,7 @@ public class JCommand {
     }
 
     public List<Float> getFloatValues(String name) {
-        List<Float> result = new ArrayList<>();
+        List<Float> result = new ArrayList<Float>();
         List<String> values = getValues(name);
         if (values.size() == 1) {
             for (String val : values.get(0).split("[;|,]")) {
@@ -213,7 +213,7 @@ public class JCommand {
     }
 
     public List<Double> getDoubleValues(String name) {
-        List<Double> result = new ArrayList<>();
+        List<Double> result = new ArrayList<Double>();
         List<String> values = getValues(name);
         if (values.size() == 1) {
             for (String val : values.get(0).split("[;|,]")) {
@@ -259,7 +259,7 @@ public class JCommand {
     }
 
     protected void printOptions(PrintStream printStream) {
-        List<JOption> options = new ArrayList<>();
+        List<JOption> options = new ArrayList<JOption>();
         if (parent != null) {
             options.addAll(parent.options);
         }
@@ -269,17 +269,19 @@ public class JCommand {
         }
 
         printStream.println("OPTIONS");
-        options.forEach(e -> {
-            List<String> allOptions = new ArrayList<>(e.getShortOptions());
+        for (JOption e : options) {
+            List<String> allOptions = new ArrayList<String>(e.getShortOptions());
             if (e.isHasValue()) {
-                e.getLongOptions().forEach(o -> allOptions.add(o + " <" + e.getValueName() + ">"));
+                for (String o : e.getLongOptions()) {
+                    allOptions.add(o + " <" + e.getValueName() + ">");
+                }
             } else {
                 allOptions.addAll(e.getLongOptions());
             }
 
             printStream.println(indent(4) + joinString(allOptions));
             printStream.println(indent(8) + e.getDescription());
-        });
+        }
     }
 
 }

@@ -11,9 +11,9 @@ public final class Jarg extends JCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(Jarg.class);
 
-    private final List<JCommand> commands = new ArrayList<>();
+    private final List<JCommand> commands = new ArrayList<JCommand>();
 
-    private final List<String> arguments = new ArrayList<>();
+    private final List<String> arguments = new ArrayList<String>();
     private boolean autoHelp;
     private JCommand command;
 
@@ -181,9 +181,9 @@ public final class Jarg extends JCommand {
             }
 
             int m = max;
-            this.commands.forEach(o -> {
+            for (JCommand o : this.commands) {
                 printStream.println(indent(4) + o.getName() + indent(8) + indent(m - o.getName().length()) + o.getDescription());
-            });
+            }
         }
     }
 
