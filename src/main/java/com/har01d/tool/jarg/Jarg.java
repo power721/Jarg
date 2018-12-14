@@ -3,13 +3,11 @@ package com.har01d.tool.jarg;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 public final class Jarg extends JCommand {
 
-    private static final Logger logger = LoggerFactory.getLogger(Jarg.class);
+    private static final Logger logger = Logger.getLogger(Jarg.class.getName());
 
     private final List<JCommand> commands = new ArrayList<JCommand>();
 
@@ -108,7 +106,7 @@ public final class Jarg extends JCommand {
                     option.setPresent(true);
                     option.setValue(value);
                 } else {
-                    logger.warn("Unknown option: " + name);
+                    logger.warning("Unknown option: " + name);
                 }
             } else if (!checkedCommand) {
                 for (JCommand command : commands) {
@@ -210,7 +208,7 @@ public final class Jarg extends JCommand {
         }
 
         if (option == null) {
-            logger.warn("Unknown option: {}", name);
+            logger.warning("Unknown option: " + name);
         }
         return option != null && option.isPresent();
     }

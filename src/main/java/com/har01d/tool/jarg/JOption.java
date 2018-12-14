@@ -2,13 +2,11 @@ package com.har01d.tool.jarg;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 public final class JOption {
 
-    private static final Logger logger = LoggerFactory.getLogger(JOption.class);
+    private static final Logger logger = Logger.getLogger(JOption.class.getName());
 
     private final List<String> longOptions = new ArrayList<String>();
     private final List<String> shortOptions = new ArrayList<String>();
@@ -44,7 +42,7 @@ public final class JOption {
                 shortOptions.add(op);
                 options.add(op.substring(1));
             } else {
-                logger.warn("Unsupported option: " + op);
+                logger.warning("Unsupported option: " + op);
             }
         }
     }

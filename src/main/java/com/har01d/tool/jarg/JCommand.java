@@ -1,18 +1,12 @@
 package com.har01d.tool.jarg;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.*;
+import java.util.logging.Logger;
 
 public class JCommand {
 
-    private static final Logger logger = LoggerFactory.getLogger(JCommand.class);
+    private static final Logger logger = Logger.getLogger(JCommand.class.getName());
 
     protected final Map<String, JOption> map = new HashMap<String, JOption>();
     protected final List<JOption> options = new ArrayList<JOption>();
@@ -94,7 +88,7 @@ public class JCommand {
         JOption option = map.get(name);
 
         if (option == null) {
-            logger.warn("Unknown option: {}", name);
+            logger.warning("Unknown option: " + name);
         }
         return option != null && option.isPresent();
     }
