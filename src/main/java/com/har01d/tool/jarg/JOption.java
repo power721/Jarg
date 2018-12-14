@@ -31,6 +31,10 @@ public final class JOption {
     }
 
     private void init() {
+        if (option == null || option.isEmpty()) {
+            throw new IllegalArgumentException("Missing options");
+        }
+
         String[] array = option.split("\\|");
         for (String op : array) {
             if (op.startsWith("--") && op.length() > 2) {
@@ -43,6 +47,13 @@ public final class JOption {
                 logger.warn("Unsupported option: " + op);
             }
         }
+    }
+
+    public String getName() {
+        if (!longOptions.isEmpty()) {
+            return longOptions.get(0);
+        }
+        return shortOptions.get(0);
     }
 
     public List<String> getLongOptions() {
@@ -77,8 +88,9 @@ public final class JOption {
         return valueName;
     }
 
-    public void setValueName(String valueName) {
+    public JOption setValueName(String valueName) {
         this.valueName = valueName;
+        return this;
     }
 
     public String getValue() {

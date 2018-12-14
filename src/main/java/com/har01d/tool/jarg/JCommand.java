@@ -51,18 +51,36 @@ public class JCommand {
 
     public JOption addOption(String value, String description, boolean hasValue) {
         JOption option = new JOption(value, description, hasValue);
-        option.getOptions().forEach(name -> {
+        return addOption(option);
+    }
+
+    public JOption addOption(JOption option) {
+        for (String name : option.getOptions()) {
             if (map.containsKey(name)) {
+                if (name.equals("help")) {
+                    return map.get(name);
+                }
                 throw new IllegalArgumentException("Duplicate option name: " + name);
             }
             map.put(name, option);
-        });
+        }
         options.add(option);
         return option;
     }
 
+    public JCommand addOptions(Iterable<JOption> options) {
+        for (JOption option : options) {
+            addOption(option);
+        }
+        return this;
+    }
+
     public boolean hasOption(String name) {
         return map.containsKey(name);
+    }
+
+    public List<JOption> getOptions() {
+        return options;
     }
 
     public JOption getOption(String name) {

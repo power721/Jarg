@@ -60,7 +60,9 @@ public final class Jarg extends JCommand {
 
     public JCommand addCommand(String name, String description) {
         JCommand command = new JCommand(name, description, this);
-        command.addOption("--help", "Show the help text", false);
+        if (autoHelp) {
+            command.addOption("--help", "Show the help text", false);
+        }
         commands.add(command);
         return command;
     }
@@ -94,6 +96,10 @@ public final class Jarg extends JCommand {
                 if (option != null) {
                     if (value == null) {
                         if (option.isHasValue()) {
+                            if (i + 1 == args.length) {
+                                throw new IllegalArgumentException("Missing required value for option "
+                                                                + option.getName());
+                            }
                             value = args[++i];
                         } else {
                             value = Boolean.TRUE.toString();
