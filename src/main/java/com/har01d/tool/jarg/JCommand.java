@@ -242,7 +242,7 @@ public class JCommand {
         options.forEach(e -> {
             List<String> allOptions = new ArrayList<>(e.getShortOptions());
             if (e.isHasValue()) {
-                e.getLongOptions().forEach(o -> allOptions.add(o + " <VALUE>"));
+                e.getLongOptions().forEach(o -> allOptions.add(o + " <" + e.getValueName() + ">"));
             } else {
                 allOptions.addAll(e.getLongOptions());
             }

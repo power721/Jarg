@@ -1,10 +1,10 @@
 package com.har01d.tool.jarg;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class JOption {
 
@@ -19,6 +19,7 @@ public final class JOption {
     private final boolean hasValue;
 
     private boolean present;
+    private String valueName = "VALUE";
     private String value;
     private List<String> values = new ArrayList<>();
 
@@ -70,6 +71,14 @@ public final class JOption {
 
     public boolean isPresent() {
         return present;
+    }
+
+    public String getValueName() {
+        return valueName;
+    }
+
+    public void setValueName(String valueName) {
+        this.valueName = valueName;
     }
 
     public String getValue() {
