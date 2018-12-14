@@ -16,6 +16,7 @@ public class JCommand {
 
     protected final Map<String, JOption> map = new HashMap<>();
     protected final List<JOption> options = new ArrayList<>();
+    final List<String> aliases = new ArrayList<>();
     private final String name;
     private final String description;
     private final JCommand parent;
@@ -24,10 +25,16 @@ public class JCommand {
         this.name = name;
         this.description = description;
         this.parent = parent;
+        this.aliases.add(name);
     }
 
     public JCommand(String name, String description) {
         this(name, description, null);
+    }
+
+    public JCommand aliases(String... aliases) {
+        this.aliases.addAll(Arrays.asList(aliases));
+        return this;
     }
 
     public String getName() {
@@ -224,7 +231,7 @@ public class JCommand {
 
     public void printHelp(PrintStream printStream) {
         printStream.println("COMMAND");
-        printStream.println(indent(4) + name + indent(8) + description);
+        printStream.println(indent(4) + joinString(aliases) + indent(8) + description);
         printOptions(printStream);
     }
 

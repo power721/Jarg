@@ -38,7 +38,7 @@ public final class Jarg extends JCommand {
     }
 
     public boolean isCommand(String name) {
-        return command != null && name.equals(command.getName());
+        return command != null && command.aliases.contains(name);
     }
 
     public JCommand getCommand() {
@@ -47,7 +47,7 @@ public final class Jarg extends JCommand {
 
     public JCommand getCommand(String name) {
         for (JCommand command : commands) {
-            if (command.getName().equals(name)) {
+            if (command.aliases.contains(name)) {
                 return command;
             }
         }
@@ -106,7 +106,7 @@ public final class Jarg extends JCommand {
                 }
             } else if (!checkedCommand) {
                 for (JCommand command : commands) {
-                    if (arg.equals(command.getName())) {
+                    if (command.aliases.contains(arg)) {
                         this.command = command;
                         break;
                     }
