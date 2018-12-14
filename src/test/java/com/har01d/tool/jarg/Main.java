@@ -1,6 +1,4 @@
-package com.har01d.demo;
-
-import com.har01d.tool.jarg.Jarg;
+package com.har01d.tool.jarg;
 
 public class Main {
     public static void main(String[] args) {

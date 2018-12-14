@@ -1,9 +1,6 @@
-package com.har01d.demo;
+package com.har01d.tool.jarg;
 
-import com.har01d.tool.jarg.JCommand;
-import com.har01d.tool.jarg.Jarg;
-
-public class CommandTest {
+public class CommandTests {
     public static void main(String[] args) {
         Jarg jarg = new Jarg("Jarg", "Java arguments parser");
         jarg.setAutoHelp(true);
