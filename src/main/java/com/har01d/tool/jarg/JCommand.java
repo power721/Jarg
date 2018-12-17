@@ -12,18 +12,20 @@ public class JCommand {
     protected final List<JOption> options = new ArrayList<JOption>();
     final List<String> aliases = new ArrayList<String>();
     private final String name;
-    private final String description;
+    private final String summary;
     private final JCommand parent;
+    protected String synopsis;
+    protected String description;
 
-    public JCommand(String name, String description, JCommand parent) {
+    public JCommand(String name, String summary, JCommand parent) {
         this.name = name;
-        this.description = description;
+        this.summary = summary;
         this.parent = parent;
         this.aliases.add(name);
     }
 
-    public JCommand(String name, String description) {
-        this(name, description, null);
+    public JCommand(String name, String summary) {
+        this(name, summary, null);
     }
 
     public JCommand aliases(String... aliases) {
@@ -31,12 +33,22 @@ public class JCommand {
         return this;
     }
 
+    public JCommand setSynopsis(String synopsis) {
+        this.synopsis = synopsis;
+        return this;
+    }
+
+    public JCommand setDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
     public String getName() {
         return name;
     }
 
-    public String getDescription() {
-        return description;
+    public String getSummary() {
+        return summary;
     }
 
     public JOption addOption(String value, String description) {
@@ -241,9 +253,34 @@ public class JCommand {
         return sb.toString();
     }
 
+    protected String indentLines(String text, int number) {
+        String indent = indent(number);
+        String[] lines = text.split("\n");
+        StringBuilder sb = new StringBuilder();
+        for (String line : lines) {
+            if (line.isEmpty()) {
+                sb.append("\n");
+            } else {
+                sb.append(indent).append(line).append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
     public void printHelp(PrintStream printStream) {
         printStream.println("COMMAND");
-        printStream.println(indent(4) + joinString(aliases) + indent(8) + description);
+        printStream.println(indent(4) + joinString(aliases) + indent(8) + summary);
+
+        if (synopsis != null) {
+            printStream.println("SYNOPSIS");
+            printStream.print(indentLines(synopsis, 4));
+        }
+
+        if (description != null) {
+            printStream.println("DESCRIPTION");
+            printStream.print(indentLines(description, 4));
+        }
+
         if (name.equals("help")) {
             printStream.println("USAGE");
             printStream.println(indent(4) + "COMMAND --help");

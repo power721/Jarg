@@ -15,6 +15,9 @@ public final class Jarg extends JCommand {
     private boolean autoHelp;
     private JCommand command;
 
+    private String author;
+    private String copyright;
+
     public Jarg(String name) {
         super(name, null);
     }
@@ -23,8 +26,19 @@ public final class Jarg extends JCommand {
         super(name, description);
     }
 
-    public void setAutoHelp(boolean autoHelp) {
+    public Jarg setAutoHelp(boolean autoHelp) {
         this.autoHelp = autoHelp;
+        return this;
+    }
+
+    public Jarg setAuthor(String author) {
+        this.author = author;
+        return this;
+    }
+
+    public Jarg setCopyright(String copyright) {
+        this.copyright = copyright;
+        return this;
     }
 
     public List<String> getArguments() {
@@ -95,8 +109,7 @@ public final class Jarg extends JCommand {
                     if (value == null) {
                         if (option.isHasValue()) {
                             if (i + 1 == args.length) {
-                                throw new IllegalArgumentException("Missing required value for option "
-                                                                + option.getName());
+                                throw new IllegalArgumentException("Missing required value for option " + option.getName());
                             }
                             value = args[++i];
                         } else {
@@ -164,10 +177,25 @@ public final class Jarg extends JCommand {
         }
 
         printStream.println("NAME");
-        printStream.println(indent(4) + getName() + (getDescription() == null ? "" : "  -    " + getDescription()));
+        printStream.println(indent(4) + getName() + (getSummary() == null ? "" : "  -    " + getSummary()));
+
+        if (synopsis != null) {
+            printStream.println("SYNOPSIS");
+            printStream.print(indentLines(synopsis, 4));
+        }
 
         printOptions(printStream);
         printCommands(printStream);
+
+        if (author != null) {
+            printStream.println("AUTHOR");
+            printStream.print(indentLines(author, 4));
+        }
+
+        if (copyright != null) {
+            printStream.println("COPYRIGHT");
+            printStream.print(indentLines(copyright, 4));
+        }
     }
 
     private void printCommands(PrintStream printStream) {
@@ -180,7 +208,7 @@ public final class Jarg extends JCommand {
 
             int m = max;
             for (JCommand o : this.commands) {
-                printStream.println(indent(4) + o.getName() + indent(8) + indent(m - o.getName().length()) + o.getDescription());
+                printStream.println(indent(4) + o.getName() + indent(8) + indent(m - o.getName().length()) + o.getSummary());
             }
         }
     }

@@ -4,6 +4,10 @@ public class CommandTests {
     public static void main(String[] args) {
         Jarg jarg = new Jarg("Jarg", "Java arguments parser");
         jarg.setAutoHelp(true);
+        jarg.setSynopsis("jarg COMMAND [OPTIONS]...");
+        jarg.setAuthor("Harold Li");
+        jarg.setCopyright("The MIT License (MIT)\n" +
+                "Copyright (c) 2018 魔神翼");
         jarg.addCommand("help", "Show this help text");
         jarg.addCommand("version", "Show the version");
         jarg.addOption("--debug|-d", "Show debug message", false);
