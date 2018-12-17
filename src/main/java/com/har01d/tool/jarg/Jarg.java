@@ -208,7 +208,7 @@ public final class Jarg extends JCommand {
         }
 
         if (option == null) {
-            logger.warning("Unknown option: " + name);
+            logger.fine("Unknown option: " + name);
         }
         return option != null && option.isPresent();
     }

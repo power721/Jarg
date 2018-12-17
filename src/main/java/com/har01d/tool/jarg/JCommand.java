@@ -88,7 +88,7 @@ public class JCommand {
         JOption option = map.get(name);
 
         if (option == null) {
-            logger.warning("Unknown option: " + name);
+            logger.fine("Unknown option: " + name);
         }
         return option != null && option.isPresent();
     }
