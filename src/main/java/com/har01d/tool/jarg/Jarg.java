@@ -49,6 +49,14 @@ public final class Jarg extends JCommand {
         return arguments.get(index);
     }
 
+    public JCommand requireCommand() {
+        if (command == null) {
+            printHelp(System.out);
+            System.exit(1);
+        }
+        return command;
+    }
+
     public boolean isCommand(String name) {
         return command != null && command.aliases.contains(name);
     }
@@ -57,7 +65,7 @@ public final class Jarg extends JCommand {
         return command;
     }
 
-    public JCommand getCommand(String name) {
+    private JCommand getCommand(String name) {
         for (JCommand command : commands) {
             if (command.aliases.contains(name)) {
                 return command;
@@ -156,14 +164,6 @@ public final class Jarg extends JCommand {
                 System.exit(0);
             }
         }
-    }
-
-    public JCommand requireCommand() {
-        if (command == null) {
-            printHelp(System.out);
-            System.exit(1);
-        }
-        return command;
     }
 
     public void printHelp(PrintStream printStream) {

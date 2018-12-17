@@ -271,7 +271,11 @@ public class JCommand {
         printStream.println("COMMAND");
         printStream.println(indent(4) + joinString(aliases) + indent(8) + summary);
 
-        if (synopsis != null) {
+        if (name.equals("help")) {
+            printStream.println("SYNOPSIS");
+            printStream.println(indent(4) + "COMMAND --help");
+            printStream.println(indent(4) + "help COMMAND");
+        } else if (synopsis != null) {
             printStream.println("SYNOPSIS");
             printStream.print(indentLines(synopsis, 4));
         }
@@ -281,11 +285,6 @@ public class JCommand {
             printStream.print(indentLines(description, 4));
         }
 
-        if (name.equals("help")) {
-            printStream.println("USAGE");
-            printStream.println(indent(4) + "COMMAND --help");
-            printStream.println(indent(4) + "help COMMAND");
-        }
         printOptions(printStream);
     }
 
