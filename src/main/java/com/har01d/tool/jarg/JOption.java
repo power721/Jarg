@@ -16,6 +16,7 @@ public final class JOption {
     private final String description;
     private final boolean hasValue;
 
+    private boolean interactive;
     private boolean present;
     private String valueName = "VALUE";
     private String value;
@@ -52,6 +53,18 @@ public final class JOption {
             return longOptions.get(0);
         }
         return shortOptions.get(0);
+    }
+
+    public JOption interactive() {
+        if (!hasValue) {
+            throw new IllegalStateException("Option " + getName() + " doesn't have value, cannot support interactive");
+        }
+        this.interactive = true;
+        return this;
+    }
+
+    public boolean isInteractive() {
+        return interactive;
     }
 
     public List<String> getLongOptions() {

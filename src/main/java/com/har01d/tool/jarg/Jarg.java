@@ -1,5 +1,6 @@
 package com.har01d.tool.jarg;
 
+import java.io.Console;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,6 +90,7 @@ public final class Jarg extends JCommand {
 
     public void parse(String[] args) {
         boolean checkedCommand = false;
+        List<JOption> prompts = new ArrayList<JOption>();
         for (int i = 0; i < args.length; ++i) {
             String arg = args[i];
             String name = null;
@@ -116,8 +118,16 @@ public final class Jarg extends JCommand {
                 if (option != null) {
                     if (value == null) {
                         if (option.isHasValue()) {
+                            if (option.isInteractive()) {
+                                if (i + 1 == args.length || isOption(args[i + 1])) {
+                                    option.setPresent(true);
+                                    prompts.add(option);
+                                    continue;
+                                }
+                            }
                             if (i + 1 == args.length) {
-                                throw new IllegalArgumentException("Missing required value for option " + option.getName());
+                                throw new IllegalArgumentException(
+                                    "Missing required value for option " + option.getName());
                             }
                             value = args[++i];
                         } else {
@@ -163,6 +173,33 @@ public final class Jarg extends JCommand {
                 printHelp(System.out);
                 System.exit(0);
             }
+        }
+
+        for (JOption option : prompts) {
+            Console console = System.console();
+            if (console == null) {
+                System.err.println("Cannot access the console device");
+                System.err.println("Specific value in command line for option " + option.getName());
+                System.exit(0);
+            }
+            char[] password = console.readPassword("Enter value of %s:", option.getName());
+            option.setValue(new String(password));
+        }
+    }
+
+    private boolean isOption(String name) {
+        if (name.startsWith("--")) {
+            name = name.substring(2);
+        } else if (name.startsWith("-")) {
+            name = name.substring(1);
+        } else {
+            return false;
+        }
+
+        if (map.containsKey(name)) {
+            return true;
+        } else {
+            return command != null && command.hasOption(name);
         }
     }
 

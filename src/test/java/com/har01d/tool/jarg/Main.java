@@ -4,7 +4,7 @@ public class Main {
     public static void main(String[] args) {
         Jarg jarg = new Jarg("Jarg");
         jarg.addOption("--user|-u", "The username");
-        jarg.addOption("--password|-p", "The password");
+        jarg.addOption("--password|-p", "The password").interactive();
         jarg.addOption("--version|-v", "Show the version", false);
         jarg.addOption("--help|-h", "Show this help text", false);
 
