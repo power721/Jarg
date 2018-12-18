@@ -90,11 +90,22 @@ public final class Jarg extends JCommand {
 
     public void parse(String[] args) {
         boolean checkedCommand = false;
+        boolean optionsEnd = false;
         List<JOption> prompts = new ArrayList<JOption>();
         for (int i = 0; i < args.length; ++i) {
             String arg = args[i];
             String name = null;
             String value = null;
+
+            if (optionsEnd) {
+                arguments.add(arg);
+                continue;
+            }
+
+            if (arg.equals("--")) {
+                optionsEnd = true;
+                continue;
+            }
 
             if (arg.startsWith("--")) {
                 name = arg.substring(2);
@@ -245,7 +256,8 @@ public final class Jarg extends JCommand {
 
             int m = max;
             for (JCommand o : this.commands) {
-                printStream.println(indent(4) + o.getName() + indent(8) + indent(m - o.getName().length()) + o.getSummary());
+                printStream
+                    .println(indent(4) + o.getName() + indent(8) + indent(m - o.getName().length()) + o.getSummary());
             }
         }
     }
