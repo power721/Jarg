@@ -17,26 +17,26 @@ Maven:
 </dependency>
 ```
 
-#### USAGE
+#### EXAMPLE
 
 ```java
 public class HttpClient {
     public static void main(String[] args) {
-        // create Jarg with name and summary. The name and summary is used to generate help.
+        // create Jarg with name and summary. The name and summary is used to generate help
         Jarg jarg = new Jarg("http-client", "A simple HTTP client");
-        jarg.autoHelp(); // Print help and exit when the help option or help command present.
+        jarg.autoHelp(); // Print help and exit when the help option or help command present
 
         // set Description for help
         jarg.setDescription("Connect to a HTTP server.\nSupport basic authentication.");
         // add an AUTHOR section for help
         jarg.addSection(Jarg.AUTHOR, "Harold");
 
-        // add an option, support long option "--username" and short option "-u".
+        // add an option, support long option "--username" and short option "-u"
         jarg.addOption("--username|-u", "The username");
         // add a password option, the value can read from console with echoing disabled
         jarg.addOption("--password|-p", "The password").interactive();
 
-        // add a flag option which doesn't have value, the option present indicate a true value.
+        // add a flag option which doesn't have value, the option present indicate a true value
         jarg.addOption("--version|-v", "Show the version", false);
         jarg.addOption("--help|-h", "Show this help text", false);
 

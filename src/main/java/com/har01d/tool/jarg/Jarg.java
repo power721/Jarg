@@ -77,9 +77,7 @@ public final class Jarg extends JCommand {
      */
     public JCommand requireCommand() {
         if (command == null) {
-            System.err.println("Missing required command!");
-            printHelp(output);
-            System.exit(1);
+            throw new IllegalArgumentException("Command name is required!");
         }
         return command;
     }
@@ -211,10 +209,10 @@ public final class Jarg extends JCommand {
                 } else {
                     printHelp(output);
                 }
-                System.exit(0);
+                return;
             } else if (isCommand("help")) {
                 printHelp(output);
-                System.exit(0);
+                return;
             }
         }
 
@@ -233,9 +231,7 @@ public final class Jarg extends JCommand {
         for (JOption option : prompts) {
             Console console = System.console();
             if (console == null) {
-                System.err.println("Cannot access the console device");
-                System.err.println("Specific value in command line for option " + option.getName());
-                System.exit(1);
+                throw new IllegalStateException("Cannot access the console device");
             }
             char[] password = console.readPassword("Enter value of %s:", option.getName());
             option.setValue(new String(password));
