@@ -10,7 +10,7 @@ public class CommandTests {
         jarg.addOption("--debug|-d", "Show debug message", false);
 
         JCommand command = jarg.addCommand("test", "Test user credentials").aliases("login");
-        command.addOption("--user|-u", "The username").setLabel("USERNAME");
+        command.addOption("--user|-u", "The username").defaultValue("admin").setLabel("USERNAME");
         command.addOption("--password|-p", "The password");
         command.addParameter("host", true);
         command.addParameter("port", true);

@@ -12,7 +12,7 @@ public final class JOption {
     private final List<String> shortOptions = new ArrayList<String>();
     private final List<String> options = new ArrayList<String>();
 
-    private final String description;
+    private String description;
     private final boolean hasValue;
 
     private boolean interactive;
@@ -148,6 +148,7 @@ public final class JOption {
             throw new IllegalStateException("Option " + getName() + " doesn't have value");
         }
         this.value = String.valueOf(value);
+        description = description + " (Default: " + this.value + ")";
         return this;
     }
 

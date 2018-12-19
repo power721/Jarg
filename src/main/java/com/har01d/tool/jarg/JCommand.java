@@ -253,11 +253,11 @@ public class JCommand {
         return result;
     }
 
-    protected String joinString(List<?> values, String sepator) {
+    protected String joinString(List<?> values, String separator) {
         StringBuilder sb = new StringBuilder();
         for (Object obj : values) {
             if (sb.length() > 0) {
-                sb.append(sepator).append(obj);
+                sb.append(separator).append(obj);
             } else {
                 sb.append(obj);
             }
@@ -292,15 +292,14 @@ public class JCommand {
         printStream.println(indent(4) + joinString(aliases, ", ") + "  -  " + summary);
         printStream.println();
 
+        printStream.println("SYNOPSIS");
         if (name.equals("help")) {
-            printStream.println("SYNOPSIS");
             printStream.println(indent(4) + "COMMAND --help");
             printStream.println(indent(4) + "help COMMAND");
         } else {
             if (synopsis == null) {
                 generateSynopsis();
             }
-            printStream.println("SYNOPSIS");
             printStream.println(indentLines(synopsis, 4));
         }
 
