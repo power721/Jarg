@@ -2,22 +2,25 @@ package com.har01d.tool.jarg;
 
 import java.io.Console;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 public final class Jarg extends JCommand {
+
+    public static final String AUTHOR = "AUTHOR";
+    public static final String REPORTING_BUGS = "REPORTING BUGS";
+    public static final String COPYRIGHT = "COPYRIGHT";
+    public static final String SEE_ALSO = "SEE ALSO";
 
     private static final Logger logger = Logger.getLogger(Jarg.class.getName());
 
     private final List<JCommand> commands = new ArrayList<JCommand>();
 
-    private final List<String> arguments = new ArrayList<String>();
+    private final List<String> argument = new ArrayList<String>();
     private boolean autoHelp;
     private JCommand command;
 
-    private String author;
-    private String copyright;
+    private final HashMap<String, String> sections = new LinkedHashMap<String, String>();
 
     public Jarg(String name) {
         super(name, null);
@@ -27,35 +30,67 @@ public final class Jarg extends JCommand {
         super(name, description);
     }
 
-    public Jarg setAutoHelp(boolean autoHelp) {
-        this.autoHelp = autoHelp;
+    /**
+     * Print help message and exit when:
+     * 1. --help option is present, or
+     * 2. is help command
+     *
+     * @return this <code>Jarg</code>
+     */
+    public Jarg autoHelp() {
+        this.autoHelp = true;
         return this;
     }
 
-    public Jarg setAuthor(String author) {
-        this.author = author;
-        return this;
-    }
-
-    public Jarg setCopyright(String copyright) {
-        this.copyright = copyright;
+    /**
+     * Add section for help message, such as, author, copyright.
+     *
+     * @param title   The section title
+     * @param content The section content
+     * @return this <code>Jarg</code>
+     */
+    public Jarg addSection(String title, String content) {
+        sections.put(title, content);
         return this;
     }
 
     public List<String> getArguments() {
-        return arguments;
+        return argument;
     }
 
     public String getArgument(int index) {
-        return arguments.get(index);
+        return argument.get(index);
     }
 
+    public String getArgument(String name) {
+        if (command != null) {
+            return command.getArgument(name);
+        }
+        return super.getArgument(name);
+    }
+
+    /**
+     * Required one command is present. otherwise, exit with code 1.
+     * @return the present <code>JCommand</code>
+     */
     public JCommand requireCommand() {
         if (command == null) {
+            System.err.println("Missing required command!");
             printHelp(System.out);
             System.exit(1);
         }
         return command;
+    }
+
+    /**
+     * Print error message, help message and exit with code 1.
+     *
+     * @param e The exception
+     */
+    public void handleError(Exception e) {
+        System.err.println(e.getMessage());
+        printHelp(System.out);
+        System.exit(1);
     }
 
     public boolean isCommand(String name) {
@@ -98,7 +133,7 @@ public final class Jarg extends JCommand {
             String value = null;
 
             if (optionsEnd) {
-                arguments.add(arg);
+                argument.add(arg);
                 continue;
             }
 
@@ -138,7 +173,7 @@ public final class Jarg extends JCommand {
                             }
                             if (i + 1 == args.length) {
                                 throw new IllegalArgumentException(
-                                    "Missing required value for option " + option.getName());
+                                        "Missing required value for option " + option.getName());
                             }
                             value = args[++i];
                         } else {
@@ -160,17 +195,17 @@ public final class Jarg extends JCommand {
 
                 checkedCommand = true;
                 if (this.command == null) {
-                    arguments.add(arg);
+                    argument.add(arg);
                 }
             } else {
-                arguments.add(arg);
+                argument.add(arg);
             }
         }
 
-        if (args.length == 0) {
-            printHelp(System.out);
-            System.exit(1);
-        }
+//        if (args.length == 0) {
+//            printHelp(System.out);
+//            System.exit(1);
+//        }
 
         if (autoHelp) {
             if (isPresent("help")) {
@@ -186,16 +221,35 @@ public final class Jarg extends JCommand {
             }
         }
 
+        if (!isPresent("help") && !isPresent("version")) {
+            List<JParameter> parameters = getParameters();
+            for (int i = 0; i < parameters.size(); ++i) {
+                JParameter parameter = parameters.get(i);
+                if (i < this.argument.size()) {
+                    parameter.setValue(this.argument.get(i));
+                } else if (parameter.isRequired()) {
+                    throw new IllegalArgumentException("Missing required argument " + parameter.getName());
+                }
+            }
+        }
+
         for (JOption option : prompts) {
             Console console = System.console();
             if (console == null) {
                 System.err.println("Cannot access the console device");
                 System.err.println("Specific value in command line for option " + option.getName());
-                System.exit(0);
+                System.exit(1);
             }
             char[] password = console.readPassword("Enter value of %s:", option.getName());
             option.setValue(new String(password));
         }
+    }
+
+    private List<JParameter> getParameters() {
+        if (command != null) {
+            return command.parameters;
+        }
+        return parameters;
     }
 
     private boolean isOption(String name) {
@@ -215,8 +269,8 @@ public final class Jarg extends JCommand {
     }
 
     public void printHelp(PrintStream printStream) {
-        if (!arguments.isEmpty()) {
-            String name = arguments.get(0);
+        if (!argument.isEmpty()) {
+            String name = argument.get(0);
             JCommand command = getCommand(name);
             if (command != null) {
                 command.printHelp(printStream);
@@ -225,24 +279,36 @@ public final class Jarg extends JCommand {
         }
 
         printStream.println("NAME");
-        printStream.println(indent(4) + getName() + (getSummary() == null ? "" : "  -    " + getSummary()));
+        printStream.println(indent(4) + getName() + (getSummary() == null ? "" : "  -  " + getSummary()));
+        printStream.println();
 
+        if (synopsis == null) {
+            generateSynopsis();
+        }
         if (synopsis != null) {
             printStream.println("SYNOPSIS");
-            printStream.print(indentLines(synopsis, 4));
+            printStream.println(indentLines(synopsis, 4));
+        }
+
+        if (description != null) {
+            printStream.println("DESCRIPTION");
+            printStream.println(indentLines(description, 4));
         }
 
         printOptions(printStream);
         printCommands(printStream);
 
-        if (author != null) {
-            printStream.println("AUTHOR");
-            printStream.print(indentLines(author, 4));
+        for (Map.Entry<String, String> entry : sections.entrySet()) {
+            printStream.println(entry.getKey().toUpperCase());
+            printStream.println(indentLines(entry.getValue(), 4));
         }
+    }
 
-        if (copyright != null) {
-            printStream.println("COPYRIGHT");
-            printStream.print(indentLines(copyright, 4));
+    private void generateSynopsis() {
+        if (commands.isEmpty()) {
+            synopsis = getName() + " [OPTION]... " + joinString(parameters, " ");
+        } else {
+            synopsis = getName() + " COMMAND [OPTION]... " + joinString(parameters, " ");
         }
     }
 
@@ -256,8 +322,7 @@ public final class Jarg extends JCommand {
 
             int m = max;
             for (JCommand o : this.commands) {
-                printStream
-                    .println(indent(4) + o.getName() + indent(8) + indent(m - o.getName().length()) + o.getSummary());
+                printStream.println(indent(4) + o.getName() + indent(8) + indent(m - o.getName().length()) + o.getSummary());
             }
         }
     }

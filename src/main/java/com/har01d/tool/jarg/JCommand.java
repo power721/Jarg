@@ -10,6 +10,7 @@ public class JCommand {
 
     protected final Map<String, JOption> map = new HashMap<String, JOption>();
     protected final List<JOption> options = new ArrayList<JOption>();
+    protected final List<JParameter> parameters = new ArrayList<JParameter>();
     final List<String> aliases = new ArrayList<String>();
     private final String name;
     private final String summary;
@@ -51,12 +52,12 @@ public class JCommand {
         return summary;
     }
 
-    public JOption addOption(String value, String description) {
-        return addOption(value, description, true);
+    public JOption addOption(String name, String description) {
+        return addOption(name, description, true);
     }
 
-    public JOption addOption(String value, String description, boolean hasValue) {
-        JOption option = new JOption(value, description, hasValue);
+    public JOption addOption(String name, String description, boolean hasValue) {
+        JOption option = new JOption(name, description, hasValue);
         return addOption(option);
     }
 
@@ -81,6 +82,16 @@ public class JCommand {
         return this;
     }
 
+    public JParameter addParameter(String name) {
+        return addParameter(name, false);
+    }
+
+    public JParameter addParameter(String name, boolean required) {
+        JParameter parameter = new JParameter(name, required);
+        parameters.add(parameter);
+        return parameter;
+    }
+
     public boolean hasOption(String name) {
         return map.containsKey(name);
     }
@@ -103,6 +114,15 @@ public class JCommand {
             logger.fine("Unknown option: " + name);
         }
         return option != null && option.isPresent();
+    }
+
+    public String getArgument(String name) {
+        for (JParameter parameter : parameters) {
+            if (parameter.getName().equals(name)) {
+                return parameter.getValue();
+            }
+        }
+        throw new IllegalArgumentException("Unknown argument " + name);
     }
 
     public String getValue(String name) {
@@ -233,13 +253,13 @@ public class JCommand {
         return result;
     }
 
-    protected String joinString(List<String> values) {
+    protected String joinString(List<?> values, String sepator) {
         StringBuilder sb = new StringBuilder();
-        for (String str : values) {
+        for (Object obj : values) {
             if (sb.length() > 0) {
-                sb.append(", ").append(str);
+                sb.append(sepator).append(obj);
             } else {
-                sb.append(str);
+                sb.append(obj);
             }
         }
         return sb.toString();
@@ -269,23 +289,31 @@ public class JCommand {
 
     public void printHelp(PrintStream printStream) {
         printStream.println("COMMAND");
-        printStream.println(indent(4) + joinString(aliases) + indent(8) + summary);
+        printStream.println(indent(4) + joinString(aliases, ", ") + "  -  " + summary);
+        printStream.println();
 
         if (name.equals("help")) {
             printStream.println("SYNOPSIS");
             printStream.println(indent(4) + "COMMAND --help");
             printStream.println(indent(4) + "help COMMAND");
-        } else if (synopsis != null) {
+        } else {
+            if (synopsis == null) {
+                generateSynopsis();
+            }
             printStream.println("SYNOPSIS");
-            printStream.print(indentLines(synopsis, 4));
+            printStream.println(indentLines(synopsis, 4));
         }
 
         if (description != null) {
             printStream.println("DESCRIPTION");
-            printStream.print(indentLines(description, 4));
+            printStream.println(indentLines(description, 4));
         }
 
         printOptions(printStream);
+    }
+
+    private void generateSynopsis() {
+        synopsis = name + " [OPTION]... " + joinString(parameters, " ");
     }
 
     protected void printOptions(PrintStream printStream) {
@@ -299,19 +327,26 @@ public class JCommand {
         }
 
         printStream.println("OPTIONS");
+        printStream.println("    Mandatory arguments to long options are mandatory for short options too.\n");
         for (JOption e : options) {
             List<String> allOptions = new ArrayList<String>(e.getShortOptions());
             if (e.isHasValue()) {
                 for (String o : e.getLongOptions()) {
-                    allOptions.add(o + " <" + e.getValueName() + ">");
+                    allOptions.add(o + "=" + e.getLabel());
                 }
             } else {
                 allOptions.addAll(e.getLongOptions());
             }
 
-            printStream.println(indent(4) + joinString(allOptions));
+            printStream.println(indent(4) + joinString(allOptions, ", "));
             printStream.println(indent(8) + e.getDescription());
         }
+        printStream.println();
+    }
+
+    @Override
+    public String toString() {
+        return name + "  -  " + summary;
     }
 
 }

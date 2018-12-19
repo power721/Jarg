@@ -18,7 +18,7 @@ public final class JOption {
 
     private boolean interactive;
     private boolean present;
-    private String valueName = "VALUE";
+    private String label;
     private String value;
     private List<String> values = new ArrayList<String>();
 
@@ -39,12 +39,19 @@ public final class JOption {
             if (op.startsWith("--") && op.length() > 2) {
                 longOptions.add(op);
                 options.add(op.substring(2));
+                if (label == null) {
+                    label = op.substring(2).toUpperCase();
+                }
             } else if (op.startsWith("-") && op.length() > 1) {
                 shortOptions.add(op);
                 options.add(op.substring(1));
             } else {
                 logger.warning("Unsupported option: " + op);
             }
+        }
+
+        if (label == null) {
+            label = "VALUE";
         }
     }
 
@@ -55,6 +62,12 @@ public final class JOption {
         return shortOptions.get(0);
     }
 
+    /**
+     * Reads a password or passphrase from the console with echoing disabled if value is not provided.
+     * If cannot access the system console will exit.
+     *
+     * @return this <code>JOption</code>
+     */
     public JOption interactive() {
         if (!hasValue) {
             throw new IllegalStateException("Option " + getName() + " doesn't have value, cannot support interactive");
@@ -95,12 +108,12 @@ public final class JOption {
         return present;
     }
 
-    public String getValueName() {
-        return valueName;
+    public String getLabel() {
+        return label;
     }
 
-    public JOption setValueName(String valueName) {
-        this.valueName = valueName;
+    public JOption setLabel(String label) {
+        this.label = label;
         return this;
     }
 

@@ -7,6 +7,8 @@ public class Main {
         jarg.addOption("--password|-p", "The password").interactive();
         jarg.addOption("--version|-v", "Show the version", false);
         jarg.addOption("--help|-h", "Show this help text", false);
+        jarg.addParameter("host", true);
+        jarg.addParameter("port", true);
 
         jarg.parse(args);
         if (jarg.isPresent("help")) {
