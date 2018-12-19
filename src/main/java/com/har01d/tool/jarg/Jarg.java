@@ -18,6 +18,7 @@ public final class Jarg extends JCommand {
 
     private final List<String> argument = new ArrayList<String>();
     private boolean autoHelp;
+    private PrintStream output = System.out;
     private JCommand command;
 
     private final HashMap<String, String> sections = new LinkedHashMap<String, String>();
@@ -26,8 +27,8 @@ public final class Jarg extends JCommand {
         super(name, null);
     }
 
-    public Jarg(String name, String description) {
-        super(name, description);
+    public Jarg(String name, String summary) {
+        super(name, summary);
     }
 
     /**
@@ -71,12 +72,13 @@ public final class Jarg extends JCommand {
 
     /**
      * Required one command is present. otherwise, exit with code 1.
+     *
      * @return the present <code>JCommand</code>
      */
     public JCommand requireCommand() {
         if (command == null) {
             System.err.println("Missing required command!");
-            printHelp(System.out);
+            printHelp(output);
             System.exit(1);
         }
         return command;
@@ -89,7 +91,7 @@ public final class Jarg extends JCommand {
      */
     public void handleError(Exception e) {
         System.err.println(e.getMessage());
-        printHelp(System.out);
+        printHelp(output);
         System.exit(1);
     }
 
@@ -117,7 +119,7 @@ public final class Jarg extends JCommand {
     public JCommand addCommand(String name, String description) {
         JCommand command = new JCommand(name, description, this);
         if (autoHelp) {
-            command.addOption("--help", "Show the help text", false);
+            command.addOption("--help", "Show the help and exit", false);
         }
         commands.add(command);
         return command;
@@ -161,30 +163,30 @@ public final class Jarg extends JCommand {
                     option = command.getOption(name);
                 }
 
-                if (option != null) {
-                    if (value == null) {
-                        if (option.isHasValue()) {
-                            if (option.isInteractive()) {
-                                if (i + 1 == args.length || isOption(args[i + 1])) {
-                                    option.setPresent(true);
-                                    prompts.add(option);
-                                    continue;
-                                }
-                            }
-                            if (i + 1 == args.length) {
-                                throw new IllegalArgumentException(
-                                        "Missing required value for option " + option.getName());
-                            }
-                            value = args[++i];
-                        } else {
-                            value = Boolean.TRUE.toString();
-                        }
-                    }
-                    option.setPresent(true);
-                    option.setValue(value);
-                } else {
+                if (option == null) {
                     logger.warning("Unknown option: " + name);
+                    continue;
                 }
+
+                if (value == null) {
+                    if (option.isHasValue()) {
+                        if (option.isInteractive()) {
+                            if (i + 1 == args.length || args[i + 1].equals("--") || isOption(args[i + 1])) {
+                                option.setPresent(true);
+                                prompts.add(option);
+                                continue;
+                            }
+                        }
+                        if (i + 1 == args.length || args[i + 1].equals("--")) {
+                            throw new IllegalArgumentException("Missing required value for option " + option.getName());
+                        }
+                        value = args[++i];
+                    } else {
+                        value = Boolean.TRUE.toString();
+                    }
+                }
+                option.setPresent(true);
+                option.setValue(value);
             } else if (!checkedCommand) {
                 for (JCommand command : commands) {
                     if (command.aliases.contains(arg)) {
@@ -202,21 +204,16 @@ public final class Jarg extends JCommand {
             }
         }
 
-//        if (args.length == 0) {
-//            printHelp(System.out);
-//            System.exit(1);
-//        }
-
         if (autoHelp) {
             if (isPresent("help")) {
                 if (command != null) {
-                    command.printHelp(System.out);
+                    command.printHelp(output);
                 } else {
-                    printHelp(System.out);
+                    printHelp(output);
                 }
                 System.exit(0);
             } else if (isCommand("help")) {
-                printHelp(System.out);
+                printHelp(output);
                 System.exit(0);
             }
         }
@@ -266,6 +263,10 @@ public final class Jarg extends JCommand {
         } else {
             return command != null && command.hasOption(name);
         }
+    }
+
+    public void printHelp() {
+        printHelp(output);
     }
 
     public void printHelp(PrintStream printStream) {

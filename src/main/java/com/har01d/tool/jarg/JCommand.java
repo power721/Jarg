@@ -52,12 +52,12 @@ public class JCommand {
         return summary;
     }
 
-    public JOption addOption(String name, String description) {
-        return addOption(name, description, true);
+    public JOption addOption(String options, String description) {
+        return addOption(options, description, true);
     }
 
-    public JOption addOption(String name, String description, boolean hasValue) {
-        JOption option = new JOption(name, description, hasValue);
+    public JOption addOption(String options, String description, boolean hasValue) {
+        JOption option = new JOption(options, description, hasValue);
         return addOption(option);
     }
 

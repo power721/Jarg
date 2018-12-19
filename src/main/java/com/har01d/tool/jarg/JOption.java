@@ -12,7 +12,6 @@ public final class JOption {
     private final List<String> shortOptions = new ArrayList<String>();
     private final List<String> options = new ArrayList<String>();
 
-    private final String option;
     private final String description;
     private final boolean hasValue;
 
@@ -22,14 +21,31 @@ public final class JOption {
     private String value;
     private List<String> values = new ArrayList<String>();
 
+    /**
+     * Construct a <code>JOption</code>.
+     * The options represent by a string, separate by "|", e.g.: "-f|--file".
+     * The short options start with "-";
+     * The long options start with "--;
+     * The first long option is the primary name if exist;
+     * Otherwise, the first short option is the primary name.
+     * <p>
+     * When the option has value, there are 3 possible ways to specific the value:
+     * 1. -f app.conf
+     * 2. --file=app.conf
+     * 3. --file app.conf
+     * If the option doesn't have value, the option present indicate a true flag.
+     *
+     * @param option      the string of options, separate by "|", e.g.: "-a|--all".
+     * @param description the option description
+     * @param hasValue    if this option has a value
+     */
     JOption(String option, String description, boolean hasValue) {
-        this.option = option;
         this.description = description;
         this.hasValue = hasValue;
-        this.init();
+        this.init(option);
     }
 
-    private void init() {
+    private void init(String option) {
         if (option == null || option.isEmpty()) {
             throw new IllegalArgumentException("Missing options");
         }
@@ -55,6 +71,11 @@ public final class JOption {
         }
     }
 
+    /**
+     * Get the primary name.
+     *
+     * @return the name
+     */
     public String getName() {
         if (!longOptions.isEmpty()) {
             return longOptions.get(0);
@@ -76,6 +97,11 @@ public final class JOption {
         return this;
     }
 
+    /**
+     * Indicate if the option read value by interactive mode.
+     *
+     * @return the interactive mode
+     */
     public boolean isInteractive() {
         return interactive;
     }
@@ -114,6 +140,14 @@ public final class JOption {
 
     public JOption setLabel(String label) {
         this.label = label;
+        return this;
+    }
+
+    public JOption defaultValue(Object value) {
+        if (!hasValue) {
+            throw new IllegalStateException("Option " + getName() + " doesn't have value");
+        }
+        this.value = String.valueOf(value);
         return this;
     }
 

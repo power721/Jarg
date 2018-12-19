@@ -32,6 +32,11 @@ public class JParameter {
         this.value = value;
     }
 
+    public JParameter defaultValue(Object value) {
+        this.value = String.valueOf(value);
+        return this;
+    }
+
     public String toString() {
         if (required) {
             return name.toUpperCase();
