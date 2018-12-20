@@ -116,6 +116,40 @@ public class JCommand {
         return option != null && option.isPresent();
     }
 
+    /**
+     * Get all the arguments.
+     *
+     * @return the arguments
+     */
+    public List<String> getArguments() {
+        return parent.getArguments();
+    }
+
+    /**
+     * Get the argument size.
+     *
+     * @return the argument size
+     */
+    public int getArgumentSize() {
+        return parent.getArgumentSize();
+    }
+
+    /**
+     * Get the positional argument by index.
+     *
+     * @param index the index
+     * @return the positional argument
+     */
+    public String getArgument(int index) {
+        return parent.getArgument(index);
+    }
+
+    /**
+     * Get the argument by name which is add as <code>JParameter</code>.
+     *
+     * @param name the argument name
+     * @return the argument
+     */
     public String getArgument(String name) {
         for (JParameter parameter : parameters) {
             if (parameter.getName().equals(name)) {

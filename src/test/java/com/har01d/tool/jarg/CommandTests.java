@@ -9,24 +9,29 @@ public class CommandTests {
         jarg.addCommand("version", "Show the version");
         jarg.addOption("--debug|-d", "Show debug message", false);
 
-        JCommand command = jarg.addCommand("test", "Test user credentials").aliases("login");
-        command.addOption("--user|-u", "The username").defaultValue("admin").setLabel("USERNAME");
-        command.addOption("--password|-p", "The password");
-        command.addParameter("host", true);
-        command.addParameter("port", true);
+        JCommand login = jarg.addCommand("test", "Test user credentials").aliases("login");
+        login.addOption("--user|-u", "The username").defaultValue("admin").setLabel("USERNAME");
+        login.addOption("--password|-p", "The password");
+        login.addParameter("host", true);
+        login.addParameter("port", true);
 
         jarg.parse(args);
+
         if (jarg.isCommand("version")) {
             System.out.println("1.0.0");
         } else {
+            JCommand command = jarg.requireCommand();
             System.out.println("Command: " + jarg.getCommandName());
             System.out.println("\nOptions:");
-            System.out.println("username: " + jarg.getValue("user"));
-            System.out.println("password: " + jarg.getValue("password"));
+            System.out.println("username: " + command.getValue("user"));
+            System.out.println("password: " + command.getValue("password"));
             System.out.println("\nArguments:");
-            System.out.println("host: " + jarg.getArgument("host"));
-            System.out.println("port: " + jarg.getArgument("port"));
-            System.out.println("arguments: " + jarg.getArguments());
+            System.out.println("host: " + command.getArgument("host"));
+            System.out.println("port: " + command.getArgument("port"));
+            if (command.getArgumentSize() > 2) {
+                System.out.println("Argument 3: " + command.getArgument(2));
+            }
+            System.out.println("arguments: " + command.getArguments());
         }
     }
 }

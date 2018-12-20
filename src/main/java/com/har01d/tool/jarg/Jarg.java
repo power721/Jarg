@@ -8,20 +8,19 @@ import java.util.logging.Logger;
 public final class Jarg extends JCommand {
 
     public static final String AUTHOR = "AUTHOR";
-    public static final String REPORTING_BUGS = "REPORTING BUGS";
     public static final String COPYRIGHT = "COPYRIGHT";
+    public static final String REPORTING_BUGS = "REPORTING BUGS";
     public static final String SEE_ALSO = "SEE ALSO";
 
     private static final Logger logger = Logger.getLogger(Jarg.class.getName());
 
+    private final HashMap<String, String> sections = new LinkedHashMap<String, String>();
     private final List<JCommand> commands = new ArrayList<JCommand>();
+    private final List<String> arguments = new ArrayList<String>();
 
-    private final List<String> argument = new ArrayList<String>();
     private boolean autoHelp;
     private PrintStream output = System.out;
     private JCommand command;
-
-    private final HashMap<String, String> sections = new LinkedHashMap<String, String>();
 
     public Jarg(String name) {
         super(name, null);
@@ -29,18 +28,6 @@ public final class Jarg extends JCommand {
 
     public Jarg(String name, String summary) {
         super(name, summary);
-    }
-
-    /**
-     * Print help message and exit when:
-     * 1. --help option is present, or
-     * 2. is help command
-     *
-     * @return this <code>Jarg</code>
-     */
-    public Jarg autoHelp() {
-        this.autoHelp = true;
-        return this;
     }
 
     /**
@@ -55,31 +42,50 @@ public final class Jarg extends JCommand {
         return this;
     }
 
+    /**
+     * Get all the arguments.
+     *
+     * @return the arguments
+     */
+    @Override
     public List<String> getArguments() {
-        return argument;
-    }
-
-    public String getArgument(int index) {
-        return argument.get(index);
-    }
-
-    public String getArgument(String name) {
-        if (command != null) {
-            return command.getArgument(name);
-        }
-        return super.getArgument(name);
+        return arguments;
     }
 
     /**
-     * Required one command is present. otherwise, exit with code 1.
+     * Get the argument size.
      *
-     * @return the present <code>JCommand</code>
+     * @return the argument size
      */
-    public JCommand requireCommand() {
-        if (command == null) {
-            throw new IllegalArgumentException("Command name is required!");
+    @Override
+    public int getArgumentSize() {
+        return arguments.size();
+    }
+
+    /**
+     * Get the positional argument by index.
+     *
+     * @param index the index
+     * @return the positional argument
+     */
+    @Override
+    public String getArgument(int index) {
+        return arguments.get(index);
+    }
+
+    /**
+     * Get the argument by name which is add as <code>JParameter</code>.
+     *
+     * @param name the argument name
+     * @return the argument
+     */
+    @Override
+    public String getArgument(String name) {
+        if (command != null) {
+            return command.getArgument(name);
+        } else {
+            return super.getArgument(name);
         }
-        return command;
     }
 
     /**
@@ -93,27 +99,54 @@ public final class Jarg extends JCommand {
         System.exit(1);
     }
 
+    /**
+     * Check if the command present by name.
+     *
+     * @param name the command name
+     * @return true if the command present
+     */
     public boolean isCommand(String name) {
         return command != null && command.aliases.contains(name);
     }
 
+    /**
+     * Required one command is present. otherwise, exit with code 1.
+     *
+     * @return the present <code>JCommand</code>
+     */
+    public JCommand requireCommand() {
+        if (command == null) {
+            throw new IllegalArgumentException("Command name is required!");
+        } else {
+            return command;
+        }
+    }
+
+    /**
+     * Get the current command.
+     *
+     * @return the command
+     */
     public JCommand getCommand() {
         return command;
     }
 
-    private JCommand getCommand(String name) {
-        for (JCommand command : commands) {
-            if (command.aliases.contains(name)) {
-                return command;
-            }
-        }
-        return null;
-    }
-
+    /**
+     * Get the current command name.
+     *
+     * @return the command name
+     */
     public String getCommandName() {
         return command == null ? null : command.getName();
     }
 
+    /**
+     * Add a command.
+     *
+     * @param name        the command name
+     * @param description the command description
+     * @return the <code>JCommand</code>
+     */
     public JCommand addCommand(String name, String description) {
         JCommand command = new JCommand(name, description, this);
         if (autoHelp) {
@@ -123,6 +156,53 @@ public final class Jarg extends JCommand {
         return command;
     }
 
+    /**
+     * Get the <code>JOption</code> by name.
+     *
+     * @param name the option name
+     * @return the <code>JOption</code>
+     */
+    @Override
+    public JOption getOption(String name) {
+        if (command != null && command.hasOption(name)) {
+            return command.getOption(name);
+        }
+
+        if (map.containsKey(name)) {
+            return map.get(name);
+        }
+
+        throw new IllegalArgumentException("Unknown option: " + name);
+    }
+
+    /**
+     * Check if the option present in arguments.
+     *
+     * @param name the option name
+     * @return true if the option present
+     */
+    @Override
+    public boolean isPresent(String name) {
+        JOption option = null;
+        if (command != null && command.hasOption(name)) {
+            option = command.getOption(name);
+        }
+
+        if (map.containsKey(name)) {
+            option = map.get(name);
+        }
+
+        if (option == null) {
+            logger.fine("Unknown option: " + name);
+        }
+        return option != null && option.isPresent();
+    }
+
+    /**
+     * Parse arguments.
+     *
+     * @param args the arguments
+     */
     public void parse(String[] args) {
         boolean checkedCommand = false;
         boolean optionsEnd = false;
@@ -133,7 +213,7 @@ public final class Jarg extends JCommand {
             String value = null;
 
             if (optionsEnd) {
-                argument.add(arg);
+                arguments.add(arg);
                 continue;
             }
 
@@ -195,10 +275,10 @@ public final class Jarg extends JCommand {
 
                 checkedCommand = true;
                 if (this.command == null) {
-                    argument.add(arg);
+                    arguments.add(arg);
                 }
             } else {
-                argument.add(arg);
+                arguments.add(arg);
             }
         }
 
@@ -207,12 +287,12 @@ public final class Jarg extends JCommand {
                 if (command != null) {
                     command.printHelp(output);
                 } else {
-                    printHelp(output);
+                    printHelp();
                 }
-                return;
+                System.exit(0);
             } else if (isCommand("help")) {
-                printHelp(output);
-                return;
+                printHelp();
+                System.exit(0);
             }
         }
 
@@ -220,8 +300,8 @@ public final class Jarg extends JCommand {
             List<JParameter> parameters = getParameters();
             for (int i = 0; i < parameters.size(); ++i) {
                 JParameter parameter = parameters.get(i);
-                if (i < this.argument.size()) {
-                    parameter.setValue(this.argument.get(i));
+                if (i < this.arguments.size()) {
+                    parameter.setValue(this.arguments.get(i));
                 } else if (parameter.isRequired()) {
                     throw new IllegalArgumentException("Missing required argument " + parameter.getName());
                 }
@@ -261,14 +341,35 @@ public final class Jarg extends JCommand {
         }
     }
 
+    /**
+     * Print help message and exit when:
+     * 1. --help option is present, or
+     * 2. is help command
+     *
+     * @return this <code>Jarg</code>
+     */
+    public Jarg autoHelp() {
+        this.autoHelp = true;
+        return this;
+    }
+
+    /**
+     * Display the help text, to the "standard" output stream by default.
+     */
     public void printHelp() {
         printHelp(output);
     }
 
+    /**
+     * Display the help text to PrintStream.
+     *
+     * @param printStream the PrintStream
+     */
+    @Override
     public void printHelp(PrintStream printStream) {
-        if (!argument.isEmpty()) {
-            String name = argument.get(0);
-            JCommand command = getCommand(name);
+        if (!arguments.isEmpty()) {
+            String name = arguments.get(0);
+            JCommand command = getCommandByName(name);
             if (command != null) {
                 command.printHelp(printStream);
                 return;
@@ -309,6 +410,15 @@ public final class Jarg extends JCommand {
         }
     }
 
+    private JCommand getCommandByName(String name) {
+        for (JCommand command : commands) {
+            if (command.aliases.contains(name)) {
+                return command;
+            }
+        }
+        return null;
+    }
+
     private void printCommands(PrintStream printStream) {
         if (!this.commands.isEmpty()) {
             printStream.println("COMMANDS");
@@ -322,34 +432,6 @@ public final class Jarg extends JCommand {
                 printStream.println(indent(4) + o.getName() + indent(8) + indent(m - o.getName().length()) + o.getSummary());
             }
         }
-    }
-
-    public JOption getOption(String name) {
-        if (command != null && command.hasOption(name)) {
-            return command.getOption(name);
-        }
-
-        if (map.containsKey(name)) {
-            return map.get(name);
-        }
-
-        throw new IllegalArgumentException("Unknown option: " + name);
-    }
-
-    public boolean isPresent(String name) {
-        JOption option = null;
-        if (command != null && command.hasOption(name)) {
-            option = command.getOption(name);
-        }
-
-        if (map.containsKey(name)) {
-            option = map.get(name);
-        }
-
-        if (option == null) {
-            logger.fine("Unknown option: " + name);
-        }
-        return option != null && option.isPresent();
     }
 
 }
