@@ -165,4 +165,17 @@ public final class JOption {
         this.values.add(value);
     }
 
+    @Override
+    public String toString() {
+        String name = getName();
+        if (hasValue) {
+            if (name.startsWith("--")) {
+                return name + "=" + label;
+            } else {
+                return name + " " + label;
+            }
+        }
+        return name;
+    }
+
 }

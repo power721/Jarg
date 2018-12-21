@@ -3,7 +3,10 @@ package com.har01d.tool.jarg;
 import java.io.Console;
 import java.io.PrintStream;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.har01d.tool.jarg.ParseException.*;
 
 public final class Jarg extends JCommand {
 
@@ -95,7 +98,30 @@ public final class Jarg extends JCommand {
      */
     public void handleError(Exception e) {
         System.err.println(e.getMessage());
-        printHelp(output);
+        if (e instanceof ParseException) {
+            int code = ((ParseException) e).getCode();
+
+
+            switch (code) {
+                case COMMAND_REQUIRED:
+                    printCommands(output);
+                    break;
+                case OPTION_VAL_REQUIRED:
+                    JOption option = (JOption) ((ParseException) e).getData();
+                    printOption(output, option);
+                    break;
+                case ARG_REQUIRED:
+                    printUsage(output);
+                    break;
+                case CONSOLE_ACCESS:
+                    output.println("Please specific option value in command line");
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            logger.log(Level.WARNING, e.getMessage(), e);
+        }
         System.exit(1);
     }
 
@@ -116,7 +142,7 @@ public final class Jarg extends JCommand {
      */
     public JCommand requireCommand() {
         if (command == null) {
-            throw new IllegalArgumentException("Command name is required!");
+            throw new ParseException(COMMAND_REQUIRED, "Command is required!");
         } else {
             return command;
         }
@@ -256,7 +282,7 @@ public final class Jarg extends JCommand {
                             }
                         }
                         if (i + 1 == args.length || args[i + 1].equals("--")) {
-                            throw new IllegalArgumentException("Missing required value for option " + option.getName());
+                            throw new ParseException(OPTION_VAL_REQUIRED, option, "Missing required value for option " + option.getName());
                         }
                         value = args[++i];
                     } else {
@@ -303,7 +329,7 @@ public final class Jarg extends JCommand {
                 if (i < this.arguments.size()) {
                     parameter.setValue(this.arguments.get(i));
                 } else if (parameter.isRequired()) {
-                    throw new IllegalArgumentException("Missing required argument " + parameter.getName());
+                    throw new ParseException(ARG_REQUIRED, "Missing required argument: " + parameter.getName());
                 }
             }
         }
@@ -311,7 +337,7 @@ public final class Jarg extends JCommand {
         for (JOption option : prompts) {
             Console console = System.console();
             if (console == null) {
-                throw new IllegalStateException("Cannot access the console device");
+                throw new ParseException(CONSOLE_ACCESS, "Cannot access the console device");
             }
             char[] password = console.readPassword("Enter value of %s:", option.getName());
             option.setValue(new String(password));
@@ -350,6 +376,9 @@ public final class Jarg extends JCommand {
      */
     public Jarg autoHelp() {
         this.autoHelp = true;
+        if (!hasOption("help")) {
+            addOption("--help", "Show the help and exit", false);
+        }
         return this;
     }
 
@@ -381,12 +410,10 @@ public final class Jarg extends JCommand {
         printStream.println();
 
         if (synopsis == null) {
-            generateSynopsis();
+            synopsis = generateSynopsis();
         }
-        if (synopsis != null) {
-            printStream.println("SYNOPSIS");
-            printStream.println(indentLines(synopsis, 4));
-        }
+        printStream.println("SYNOPSIS");
+        printStream.println(indentLines(synopsis, 4));
 
         if (description != null) {
             printStream.println("DESCRIPTION");
@@ -402,11 +429,11 @@ public final class Jarg extends JCommand {
         }
     }
 
-    private void generateSynopsis() {
+    private String generateSynopsis() {
         if (commands.isEmpty()) {
-            synopsis = getName() + " [OPTION]... " + joinString(parameters, " ");
+            return getName() + " [OPTION]... " + joinString(parameters, " ");
         } else {
-            synopsis = getName() + " COMMAND [OPTION]... " + joinString(parameters, " ");
+            return getName() + " COMMAND [OPTION]... " + joinString(parameters, " ");
         }
     }
 
@@ -432,6 +459,16 @@ public final class Jarg extends JCommand {
                 printStream.println(indent(4) + o.getName() + indent(8) + indent(m - o.getName().length()) + o.getSummary());
             }
         }
+    }
+
+    @Override
+    protected void printUsage(PrintStream printStream) {
+        if (command != null) {
+            command.printUsage(output);
+            return;
+        }
+
+        printStream.print("Usage: " + generateSynopsis());
     }
 
 }

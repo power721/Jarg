@@ -156,7 +156,7 @@ public class JCommand {
                 return parameter.getValue();
             }
         }
-        throw new IllegalArgumentException("Unknown argument " + name);
+        throw new IllegalArgumentException("Unknown argument: " + name);
     }
 
     public String getValue(String name) {
@@ -362,19 +362,28 @@ public class JCommand {
         printStream.println("OPTIONS");
         printStream.println("    Mandatory arguments to long options are mandatory for short options too.\n");
         for (JOption e : options) {
-            List<String> allOptions = new ArrayList<String>(e.getShortOptions());
-            if (e.isHasValue()) {
-                for (String o : e.getLongOptions()) {
-                    allOptions.add(o + "=" + e.getLabel());
-                }
-            } else {
-                allOptions.addAll(e.getLongOptions());
-            }
-
-            printStream.println(indent(4) + joinString(allOptions, ", "));
-            printStream.println(indent(8) + e.getDescription());
+            printOption(printStream, e);
         }
         printStream.println();
+    }
+
+    protected void printOption(PrintStream printStream, JOption option) {
+        List<String> allOptions = new ArrayList<String>(option.getShortOptions());
+        if (option.isHasValue()) {
+            for (String o : option.getLongOptions()) {
+                allOptions.add(o + "=" + option.getLabel());
+            }
+        } else {
+            allOptions.addAll(option.getLongOptions());
+        }
+
+        printStream.println(indent(4) + joinString(allOptions, ", "));
+        printStream.println(indent(8) + option.getDescription());
+    }
+
+    protected void printUsage(PrintStream printStream) {
+        printStream.print("Usage: ");
+        printStream.println(getName() + " [OPTION]... " + joinString(parameters, " "));
     }
 
     @Override
