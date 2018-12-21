@@ -386,6 +386,11 @@ public class JCommand {
         printStream.println(getName() + " [OPTION]... " + joinString(parameters, " "));
     }
 
+    protected void listOptions(PrintStream printStream) {
+        printStream.print("Options: ");
+        printStream.println(joinString(options, ", "));
+    }
+
     @Override
     public String toString() {
         return name + "  -  " + summary;

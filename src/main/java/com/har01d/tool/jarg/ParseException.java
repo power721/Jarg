@@ -2,6 +2,7 @@ package com.har01d.tool.jarg;
 
 public class ParseException extends RuntimeException {
 
+    public static final int UNKNOWN_OPTION = 1;
     public static final int COMMAND_REQUIRED = 3;
     public static final int OPTION_VAL_REQUIRED = 4;
     public static final int ARG_REQUIRED = 5;

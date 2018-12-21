@@ -101,8 +101,10 @@ public final class Jarg extends JCommand {
         if (e instanceof ParseException) {
             int code = ((ParseException) e).getCode();
 
-
             switch (code) {
+                case UNKNOWN_OPTION:
+                    listOptions(output);
+                    break;
                 case COMMAND_REQUIRED:
                     printCommands(output);
                     break;
@@ -268,8 +270,7 @@ public final class Jarg extends JCommand {
                 }
 
                 if (option == null) {
-                    logger.warning("Unknown option: " + name);
-                    continue;
+                    throw new ParseException(UNKNOWN_OPTION, "Unknown option: " + arg);
                 }
 
                 if (value == null) {
@@ -469,6 +470,15 @@ public final class Jarg extends JCommand {
         }
 
         printStream.print("Usage: " + generateSynopsis());
+    }
+
+    @Override
+    protected void listOptions(PrintStream printStream) {
+        if (command != null) {
+            command.listOptions(printStream);
+        } else {
+            super.listOptions(printStream);
+        }
     }
 
 }
