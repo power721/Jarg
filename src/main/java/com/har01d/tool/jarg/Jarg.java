@@ -185,6 +185,34 @@ public final class Jarg extends JCommand {
     }
 
     /**
+     * Clone a command with new name and description.
+     *
+     * @param sourceName  the source command name
+     * @param name        the command name
+     * @param description the command description
+     * @return the <code>JCommand</code>
+     */
+    public JCommand cloneCommand(String sourceName, String name, String description) {
+        JCommand source = null;
+        for (JCommand c : commands) {
+            if (c.getName().equals(sourceName)) {
+                source = c;
+                break;
+            }
+        }
+
+        if (source == null) {
+            throw new ParseException(COMMAND_REQUIRED, "Cannot find source command \"" + sourceName + "\"");
+        }
+
+        JCommand command = new JCommand(name, description, this);
+        command.addOptions(source.options);
+        command.addParameters(source.parameters);
+        commands.add(command);
+        return command;
+    }
+
+    /**
      * Get the <code>JOption</code> by name.
      *
      * @param name the option name
