@@ -92,6 +92,17 @@ public class JCommand {
         return parameter;
     }
 
+    public JCommand addParameters(Iterable<JParameter> parameters) {
+        for (JParameter parameter : parameters) {
+            addParameter(parameter.getName(), parameter.isRequired());
+        }
+        return this;
+    }
+
+    public List<JParameter> getParameters() {
+        return parameters;
+    }
+
     public boolean hasOption(String name) {
         return map.containsKey(name);
     }

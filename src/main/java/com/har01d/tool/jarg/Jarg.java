@@ -345,7 +345,7 @@ public final class Jarg extends JCommand {
         }
     }
 
-    private List<JParameter> getParameters() {
+    public List<JParameter> getParameters() {
         if (command != null) {
             return command.parameters;
         }
