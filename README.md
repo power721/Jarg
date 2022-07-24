@@ -11,7 +11,7 @@ Software architecture description
 Maven:
 ```xml
 <dependency>
-    <groupId>com.har01d.tool</groupId>
+    <groupId>cn.har01d.tool</groupId>
     <artifactId>jarg</artifactId>
     <version>1.0</version>
 </dependency>
