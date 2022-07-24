@@ -1,4 +1,4 @@
-package com.har01d.tool.jarg;
+package cn.har01d.tool.jarg;
 
 public class JParameter {
     private final String name;

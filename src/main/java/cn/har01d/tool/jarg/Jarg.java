@@ -1,12 +1,10 @@
-package com.har01d.tool.jarg;
+package cn.har01d.tool.jarg;
 
 import java.io.Console;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static com.har01d.tool.jarg.ParseException.*;
 
 public final class Jarg extends JCommand {
 
@@ -102,20 +100,20 @@ public final class Jarg extends JCommand {
             int code = ((ParseException) e).getCode();
 
             switch (code) {
-                case UNKNOWN_OPTION:
+                case ParseException.UNKNOWN_OPTION:
                     listOptions(output);
                     break;
-                case COMMAND_REQUIRED:
+                case ParseException.COMMAND_REQUIRED:
                     printCommands(output);
                     break;
-                case OPTION_VAL_REQUIRED:
+                case ParseException.OPTION_VAL_REQUIRED:
                     JOption option = (JOption) ((ParseException) e).getData();
                     printOption(output, option);
                     break;
-                case ARG_REQUIRED:
+                case ParseException.ARG_REQUIRED:
                     printUsage(output);
                     break;
-                case CONSOLE_ACCESS:
+                case ParseException.CONSOLE_ACCESS:
                     output.println("Please specific option value in command line");
                     break;
                 default:
@@ -144,7 +142,7 @@ public final class Jarg extends JCommand {
      */
     public JCommand requireCommand() {
         if (command == null) {
-            throw new ParseException(COMMAND_REQUIRED, "Command is required!");
+            throw new ParseException(ParseException.COMMAND_REQUIRED, "Command is required!");
         } else {
             return command;
         }
@@ -202,7 +200,7 @@ public final class Jarg extends JCommand {
         }
 
         if (source == null) {
-            throw new ParseException(COMMAND_REQUIRED, "Cannot find source command \"" + sourceName + "\"");
+            throw new ParseException(ParseException.COMMAND_REQUIRED, "Cannot find source command \"" + sourceName + "\"");
         }
 
         JCommand command = new JCommand(name, description, this);
@@ -298,7 +296,7 @@ public final class Jarg extends JCommand {
                 }
 
                 if (option == null) {
-                    throw new ParseException(UNKNOWN_OPTION, "Unknown option: " + arg);
+                    throw new ParseException(ParseException.UNKNOWN_OPTION, "Unknown option: " + arg);
                 }
 
                 if (value == null) {
@@ -311,7 +309,7 @@ public final class Jarg extends JCommand {
                             }
                         }
                         if (i + 1 == args.length || args[i + 1].equals("--")) {
-                            throw new ParseException(OPTION_VAL_REQUIRED, option, "Missing required value for option " + option.getName());
+                            throw new ParseException(ParseException.OPTION_VAL_REQUIRED, option, "Missing required value for option " + option.getName());
                         }
                         value = args[++i];
                     } else {
@@ -358,7 +356,7 @@ public final class Jarg extends JCommand {
                 if (i < this.arguments.size()) {
                     parameter.setValue(this.arguments.get(i));
                 } else if (parameter.isRequired()) {
-                    throw new ParseException(ARG_REQUIRED, "Missing required argument: " + parameter.getName());
+                    throw new ParseException(ParseException.ARG_REQUIRED, "Missing required argument: " + parameter.getName());
                 }
             }
         }
@@ -366,7 +364,7 @@ public final class Jarg extends JCommand {
         for (JOption option : prompts) {
             Console console = System.console();
             if (console == null) {
-                throw new ParseException(CONSOLE_ACCESS, "Cannot access the console device");
+                throw new ParseException(ParseException.CONSOLE_ACCESS, "Cannot access the console device");
             }
             char[] password = console.readPassword("Enter value of %s:", option.getName());
             option.setValue(new String(password));
